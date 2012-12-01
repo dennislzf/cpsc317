@@ -18,12 +18,19 @@
 #include "service.h"
 #include "util.h"
 
+char receive_buffer[3000];
+
 void handle_client(int socket) {
-    
+
     /* TODO Loop receiving requests and sending appropriate responses,
      *      until one of the conditions to close the connection is
      *      met.
      */
-    
+    while(1){
+        //receive();
+        //parseCommand();
+        //buildResponse();
+        //sendResponse();
+    }
     return;
 }
