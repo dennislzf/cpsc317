@@ -10,6 +10,6 @@ void receive(int socket, char* commandBuffer);
 char * resizeCommandArray(char* commandBuffer);
 void flushCommandBuffer(char* commandBuffer);
 char* parseCommand(char* buffer, int buffersize);
-
+int requestIsValid(char* buffer, int buffersize);
 
 #endif

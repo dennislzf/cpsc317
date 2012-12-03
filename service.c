@@ -29,14 +29,16 @@ void handle_client(int socket) {
 
     while(1){
         if(isSocketClosed){
-            printf("Socket closed. Connection end");
+            printf("Socket closed. Connection end\n");
             return;
         }
 
         receive(socket,commandBuffer);
-        //parseCommand(commandBuffer, commandBufferContent);
-        //buildRespone();
-        //sendResponse():
+        if(requestIsValid(commandBuffer,commandBufferContent)){
+            parseCommand(commandBuffer, commandBufferContent);
+            //buildRespone();
+            //sendResponse():
+        }
         flushCommandBuffer(commandBuffer);
 
         isSocketClosed = 1;
@@ -70,7 +72,7 @@ void receive(int socket,char* commandBuffer){
         // Check if we need to resize the command array
         if((receivedBytes + currentBufferCopyPos) >= commandBufferCapcity){
             printf("Resizing\n");
-            commandBuffer = resizeCommandArray(commandBuffer);
+            resizeCommandArray(commandBuffer);
         }
 
         // Copy the received bytes into the command buffer
@@ -84,7 +86,7 @@ void receive(int socket,char* commandBuffer){
     }
     while(receivedBytes > 2 && commandBuffer[currentBufferCopyPos-1] == 13 && commandBuffer[currentBufferCopyPos-2] == 10); // while there is data to read
 
-    printf("Done receiving");
+    printf("Done receiving\n");
 }
 
 /*
@@ -97,7 +99,7 @@ char * resizeCommandArray(char* commandBuffer){
 
     // Copy the old elements over
     int index;
-    for(index = 0; index < commandBufferContent;index++){
+    for(index = 0; index <= commandBufferContent;index++){
         newCommandBuffer[index] = commandBuffer[index];
     }
 
@@ -239,4 +241,22 @@ char* parseCommand(char* buffer, int buffersize){
     printf("QUERYSTRING2%s\n",requestparse[3]);
 
     return *requestparse;
+}
+/*
+ * Returns 1 if we have a GET or POST at the beginning of the message
+ * 0 otherwise
+ */
+int requestIsValid(char *buffer, int buffersize){
+    // Check if we have space for a "GET"
+    if(buffersize >= 3){
+        if(buffer[0] == 'G' && buffer[1] == 'E' && buffer[2] == 'T'){
+            return 1;
+        }
+    }
+    if(buffersize >= 4){
+        if(buffer[0] == 'P' && buffer[1] == 'O' && buffer[2] == 'S' && buffer[3] == 'T'){
+            return 1;
+        }
+    }
+    return 0;
 }
