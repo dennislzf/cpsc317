@@ -8,7 +8,8 @@
 void handle_client(int socket);
 void receive(int socket, char* commandBuffer);
 char * resizeCommandArray(char* commandBuffer);
-void flushCommandBuffer();
+void flushCommandBuffer(char* commandBuffer);
 char* parseCommand(char* buffer, int buffersize);
+
 
 #endif
