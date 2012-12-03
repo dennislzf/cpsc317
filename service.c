@@ -26,7 +26,7 @@ void handle_client(int socket) {
 char *commandBuffer = malloc(sizeof(char) * commandBufferCapcity);
     while(1){
 receive(socket,commandBuffer);
-printf("hello");
+
 parseCommand(commandBuffer, commandBufferContent);
 //buildRespone();
 //sendResponse():
@@ -37,8 +37,8 @@ parseCommand(commandBuffer, commandBufferContent);
     return;
 }
 char* parseCommand(char* buffer, int buffersize){
-    
-	buffer = "GET /servertime HTTP/1.1";
+	
+	
 	
 	char*  querystring[4];
 	char* requesttype;
@@ -154,6 +154,11 @@ char* parseCommand(char* buffer, int buffersize){
 		numparameter++;
 	}
 	printf("hihi");
+	printf("REQUESTTYPE:%s\n",requestparse[0]);
+printf("COMMANDTYPE:%s\n",requestparse[1]);
+printf("QUERYSTRING1%s\n",requestparse[2]);
+printf("QUERYSTRING2%s\n",requestparse[3]);
+
 return *requestparse;
 }
 
