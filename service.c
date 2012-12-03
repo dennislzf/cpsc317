@@ -87,6 +87,7 @@ void receive(int socket,char* commandBuffer){
     while(receivedBytes > 2 && commandBuffer[currentBufferCopyPos-1] == 13 && commandBuffer[currentBufferCopyPos-2] == 10); // while there is data to read
 
     printf("Done receiving\n");
+    printBuffer(commandBuffer,commandBufferContent);
 }
 
 /*
@@ -259,4 +260,15 @@ int requestIsValid(char *buffer, int buffersize){
         }
     }
     return 0;
+}
+/*
+ * Print buffer
+ */
+void printBuffer(char *buffer, int buffersize){
+    printf("Buffer content: ");
+    int i;
+    for(i = 0;i <= buffersize;i++){
+        printf("%c",buffer[i]);
+    }
+    printf("\n");
 }
