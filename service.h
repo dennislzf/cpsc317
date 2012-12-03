@@ -11,4 +11,5 @@ char * resizeCommandArray(char* commandBuffer);
 void flushCommandBuffer(char* commandBuffer);
 char* parseCommand(char* buffer, int buffersize);
 
+
 #endif
