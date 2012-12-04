@@ -12,11 +12,12 @@ void flushCommandBuffer(char* commandBuffer);
 char* parseCommand(char* buffer, int buffersize);
 int requestIsValid(char* buffer, int buffersize);
 void printBuffer(char* buffer, int buffersize);
-void handleServerTimeRequest(int statusCode);
+void handleServerTimeRequest();
 char* getDeliveryCode(int statusCode);
+char* getConnectionMessage(int command);
+char* getDateMessage();
 int getArraySize(char* array);
 void sendToClient(char* content, int contentLength);
-void handleServerTime(int i);
-void handleLogin(int i);
+void handleLoginRequest();
 
 #endif

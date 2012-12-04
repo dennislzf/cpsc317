@@ -15,6 +15,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <ctype.h>
+#include <time.h>
 
 #include "service.h"
 #include "util.h"
@@ -284,17 +285,28 @@ void printBuffer(char *buffer, int buffersize){
     }
     printf("\n");
 }
-void handleLogin(int i){
+
+void handleLoginRequest(int i){
 }
 /*
  * Handles a servertime request from the client
  */
-void handleServerTimeRequest(int statusCode){
-    printf("The status code is %d",statusCode);
+void handleServerTimeRequest(){
+    // The delivery code message
     char* deliveryCodeMessage = getDeliveryCode(statusCode);
     int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
 
+    // The connection message
+    char* connectionMessage = getConnectionMessage(0); // close the connection
+    int connectionMessageLength = getArraySize(connectionMessage);
+
+    // The date message
+    char* dateMessage = getDateMessage();
+    int dateMessageLength = getArraySize(dateMessage);
+
     sendToClient(deliveryCodeMessage,deliveryCodeMessageLength);
+    printf("CMSG: %s %d",connectionMessage,connectionMessageLength);
+    printf("DMSG: %s %d",dateMessage,dateMessageLength);
 }
 /*
  * Returns a message corresponding to the delivery code and its length
@@ -348,4 +360,31 @@ int requestIsValid(char *buffer, int buffersize){
         }
     }
     return 0;
+}
+/*
+ * Gets the connection message string
+ * 0 for close
+ */
+char* getConnectionMessage(int command){
+    char *connectionMessage;
+
+    if(command == 1){
+        connectionMessage = "Connection: keep alive";
+    }
+    else{
+        connectionMessage = "Connection: close";
+    }
+    return connectionMessage;
+}
+/*
+ * Gets the current date message string
+ */
+char* getDateMessage(){
+    char *dateMessage = malloc(sizeof(char) * 256);
+    time_t *timeData = malloc(sizeof(time_t));
+    struct tm * currentTime;
+    currentTime = gmtime(timeData);
+    strftime(dateMessage,256,"",currentTime);
+
+    return dateMessage;
 }
