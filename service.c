@@ -28,7 +28,7 @@ char* requestparse[7];
 
 void handle_client(int socket) {
     char *commandBuffer = malloc(sizeof(char) * commandBufferCapcity);
-
+    clientSocket = socket;
     while(1){
         if(isSocketClosed){
             printf("Socket closed. Connection end\n");
@@ -38,11 +38,9 @@ void handle_client(int socket) {
         receive(socket,commandBuffer);
         if(requestIsValid(commandBuffer,commandBufferContent)){
             parseCommand(commandBuffer, commandBufferContent);
-            //buildRespone();
-            //sendResponse():
         }
         else{
-
+            printf("Invalid Syntax\n");
         }
         isSocketClosed = 1;
         flushCommandBuffer(commandBuffer);
@@ -70,9 +68,6 @@ void receive(int socket,char* commandBuffer){
         receivedBytes = recv(socket, receive_buffer, receiveBufferSize,0);
         if(receivedBytes == -1){
             printf("ERROR");
-        }
-        else{
-            printf("Received %d bytes\n", receivedBytes);
         }
         // Check if we need to resize the command array
         if((receivedBytes + currentBufferCopyPos) >= commandBufferCapcity){
