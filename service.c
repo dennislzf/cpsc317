@@ -31,12 +31,11 @@ void handle_client(int socket) {
     clientSocket = socket;
     while(1){
         if(isSocketClosed){
-            printf("Socket closed. Connection end");
+            printf("Socket closed. Connection end\n");
             return;
         }
 
         receive(socket,commandBuffer);
-        printBuffer(commandBuffer,commandBufferContent);
         if(requestIsValid(commandBuffer,commandBufferContent)){
             parseCommand(commandBuffer, commandBufferContent);
         }
@@ -88,7 +87,7 @@ void receive(int socket,char* commandBuffer){
     }
     while(receivedBytes > 2 && commandBuffer[currentBufferCopyPos-2] != 13 && commandBuffer[currentBufferCopyPos-1] != 10); // while there is data to read
 
-    printf("Done receiving");
+    printf("Done receiving\n");
 }
 
 
@@ -155,7 +154,7 @@ char* parseCommand(char* buffer, int buffersize){
 
     int i = 0;
     int ii = 0;
-    char strservertime[10];
+    char* strservertime = malloc(99);
 
 
     //get command type of request.
@@ -165,48 +164,205 @@ char* parseCommand(char* buffer, int buffersize){
         if (buffer[startofcommand + 4] == 'i'){
             commandtype = "login";
             if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
-                handleLogin(404);
+                throw404();
+            }else{
+                for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                    strservertime[ii] = tolower(buffer[i]);
+                    ii++;
+                }
+
+                if(strncmp(strservertime,"login",5) == 0){
+                    handleLoginRequest();
+                }else {
+
+                    throw404();}
+
             }
         }
         else{
-            commandtype = "logout";
+            if(buffer[startofcommand + 7] != ' ' && buffer[startofcommand + 7] != '?'){
+                throw404();
+            }else{
+                for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                    strservertime[ii] = tolower(buffer[i]);
+                    ii++;
+                }
+
+                if(strncmp(strservertime,"logout",6) == 0){
+                    handleLogoutRequest();
+                }else {
+
+                    throw404();}
+
+            }
         }
+        commandtype = "logout";
+
         break;
 
     case ('s'):
         if(buffer[startofcommand + 11] != ' ' && buffer[startofcommand + 11] != '?'){
-            handleServerTimeRequest(404);
+
+            throw404();
         }
-        for (i = startofcommand + 1; i <startofcommand + 11;i++){
-            strservertime[ii] = tolower(buffer[i]);
-            ii++;
+        else{
+            for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                strservertime[ii] = tolower(buffer[i]);
+                ii++;
+            }
+
+            if(strncmp(strservertime,"servertime",10) == 0){
+                handleServerTimeRequest();
+            }else {
+
+                throw404();
+            }
         }
-        if(strcmp(strservertime,"servertime") == 0){
-            handleServerTimeRequest(200);
-        }else handleServerTimeRequest(404);
 
         commandtype = "servertime";
         break;
     case('b'):
+        if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+
+            throw404();
+        }
+        else{
+            for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                strservertime[ii] = tolower(buffer[i]);
+                ii++;
+            }
+
+            if(strncmp(strservertime,"browser",7) == 0){
+                handleBrowserRequest();
+            }else {
+
+                throw404();
+            }
+        }
         commandtype = "browser";
         break;
     case('r'):
+        if(buffer[startofcommand + 9] != ' ' && buffer[startofcommand + 9] != '?'){
+
+            throw404();
+        }
+        else{
+            for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                strservertime[ii] = tolower(buffer[i]);
+                ii++;
+            }
+
+            if(strncmp(strservertime,"redirect",8) == 0){
+                handleRedirectRequest();
+            }else {
+
+                throw404();
+            }
+        }
         commandtype = "redirect";
         break;
     case('g'):
+        if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+
+            throw404();
+        }
+        else{
+            for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                strservertime[ii] = tolower(buffer[i]);
+                ii++;
+            }
+
+            if(strncmp(strservertime,"getfile",7) == 0){
+                handleGetFileRequest();
+            }else {
+
+                throw404();
+            }
+        }
         commandtype = "getfile";
         break;
     case('a'):
+        if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+
+            throw404();
+        }
+        else{
+            for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                strservertime[ii] = tolower(buffer[i]);
+                ii++;
+            }
+
+            if(strncmp(strservertime,"addcart",7) == 0){
+                handleAddCartRequest();
+            }else {
+
+                throw404();
+            }
+        }
+
         commandtype = "addcart";
         break;
     case('d'):
+        if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+
+            throw404();
+        }
+        else{
+            for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                strservertime[ii] = tolower(buffer[i]);
+                ii++;
+            }
+
+            if(strncmp(strservertime,"delcart",7) == 0){
+                handleDelCartRequest();
+            }else {
+
+                throw404();
+            }
+        }
         commandtype = "delcart";
         break;
     case('c'):
         if(buffer[startofcommand + 2] == 'h'){
+            if(buffer[startofcommand + 9] != ' ' && buffer[startofcommand + 9] != '?'){
+
+                throw404();
+            }
+            else{
+                for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                    strservertime[ii] = tolower(buffer[i]);
+                    ii++;
+                }
+
+                if(strncmp(strservertime,"checkout",8) == 0){
+                    handleCheckoutRequest();
+                }else {
+
+                    throw404();
+                }
+            }
             commandtype = "checkout";
         }
-        else commandtype = "close";
+        else{
+            if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
+
+                throw404();
+            }
+            else{
+                for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                    strservertime[ii] = tolower(buffer[i]);
+                    ii++;
+                }
+
+                if(strncmp(strservertime,"close",5) == 0){
+                    handleCloseRequest();
+                }else {
+
+                    throw404();
+                }
+            }
+            commandtype = "close";
+        }
         break;
     default:
         commandtype = "Command not found.";
@@ -253,8 +409,6 @@ char* parseCommand(char* buffer, int buffersize){
 
             parameter++;
 
-
-
         }
     }
 
@@ -273,7 +427,6 @@ char* parseCommand(char* buffer, int buffersize){
     return *requestparse;
 }
 
-
 /*
  * Print buffer helper function
  */
@@ -286,14 +439,14 @@ void printBuffer(char *buffer, int buffersize){
     printf("\n");
 }
 
-void handleLoginRequest(int i){
+void handleLoginRequest(){
 }
 /*
  * Handles a servertime request from the client
  */
 void handleServerTimeRequest(){
     // The delivery code message
-    char* deliveryCodeMessage = getDeliveryCode(statusCode);
+    char* deliveryCodeMessage = getDeliveryCode(200); // assume everything went well. Otherwise 404 would've been called
     int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
 
     // The connection message
@@ -305,8 +458,8 @@ void handleServerTimeRequest(){
     int dateMessageLength = getArraySize(dateMessage);
 
     sendToClient(deliveryCodeMessage,deliveryCodeMessageLength);
-    printf("CMSG: %s %d",connectionMessage,connectionMessageLength);
-    printf("DMSG: %s %d",dateMessage,dateMessageLength);
+    printf("CMSG: %s %d\n",connectionMessage,connectionMessageLength);
+    printf("DMSG: %s %d\n",dateMessage,dateMessageLength);
 }
 /*
  * Returns a message corresponding to the delivery code and its length
@@ -381,10 +534,43 @@ char* getConnectionMessage(int command){
  */
 char* getDateMessage(){
     char *dateMessage = malloc(sizeof(char) * 256);
-    time_t *timeData = malloc(sizeof(time_t));
+
+    time_t timeData;
     struct tm * currentTime;
-    currentTime = gmtime(timeData);
-    strftime(dateMessage,256,"",currentTime);
+    time(&timeData);
+    currentTime = gmtime(&timeData);
+    if(currentTime == 0){
+
+    }
+    strftime(dateMessage,256,"%a, %d %b %Y %H:%M:%S",currentTime);
 
     return dateMessage;
+}
+
+void handleLogoutRequest(){
+    printf("logout");
+}
+void throw404(){
+    printf("404 error");
+}
+void handleBrowserRequest(){
+    printf("browser");
+}
+void handleCloseRequest(){
+    printf("close");
+}
+void handleAddCartRequest(){
+    printf("addcart");
+}
+void handleDelCartRequest(){
+    printf("delcart");
+}
+void handleCheckoutRequest(){
+    printf("checkout");
+}
+void handleGetFileRequest(){
+    printf("getfile");
+}
+void handleRedirectRequest(){
+    printf("redirect");
 }
