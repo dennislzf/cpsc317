@@ -18,9 +18,11 @@
 #include "service.h"
 #include "util.h"
 
-int commandBufferCapcity = 10;
+int commandBufferCapcity = 1000;
 int commandBufferContent = 0;
+int resultBufferCapacity = 10;
 int isSocketClosed = 0;
+int clientSocket = -1;
 
 char* requestparse[7];
 
@@ -39,9 +41,12 @@ void handle_client(int socket) {
             //buildRespone();
             //sendResponse():
         }
+        else{
+
+        }
+        isSocketClosed = 1;
         flushCommandBuffer(commandBuffer);
 
-        isSocketClosed = 1;
     }
 
     return;
@@ -71,8 +76,7 @@ void receive(int socket,char* commandBuffer){
         }
         // Check if we need to resize the command array
         if((receivedBytes + currentBufferCopyPos) >= commandBufferCapcity){
-            printf("Resizing\n");
-            resizeCommandArray(commandBuffer);
+            commandBuffer = resizeCommandArray(commandBuffer);
         }
 
         // Copy the received bytes into the command buffer
@@ -84,7 +88,7 @@ void receive(int socket,char* commandBuffer){
 
         commandBufferContent = currentBufferCopyPos;
     }
-    while(receivedBytes > 2 && commandBuffer[currentBufferCopyPos-1] == 13 && commandBuffer[currentBufferCopyPos-2] == 10); // while there is data to read
+    while(receivedBytes > 2 && commandBuffer[currentBufferCopyPos-2] != 13 && commandBuffer[currentBufferCopyPos-1] != 10); // while there is data to read
 
     printf("Done receiving\n");
     printBuffer(commandBuffer,commandBufferContent);
@@ -96,16 +100,20 @@ void receive(int socket,char* commandBuffer){
 char * resizeCommandArray(char* commandBuffer){
     // Create a new buffer
     commandBufferCapcity = commandBufferCapcity * 2;
+    printf("Start resizing to %d\n",commandBufferCapcity);
+
     char *newCommandBuffer = malloc(sizeof(char) * commandBufferCapcity);
+    printf("Got resizing\n");
 
     // Copy the old elements over
     int index;
     for(index = 0; index <= commandBufferContent;index++){
         newCommandBuffer[index] = commandBuffer[index];
     }
+    printf("Done resizing\n");
 
     // Delete the old command Buffer
-    //free(commandBuffer);
+    free(commandBuffer);
 
     return newCommandBuffer;
 }
@@ -123,6 +131,9 @@ char* parseCommand(char* buffer, int buffersize){
 
 
     char*  querystring[4];
+    querystring[1] =malloc(99);
+    querystring[2] =malloc(99);
+    querystring[3] =malloc(99);
     char* requesttype;
     char* commandtype;
     int querystringval = 0;
@@ -149,6 +160,7 @@ char* parseCommand(char* buffer, int buffersize){
         for( i = startofcommand + 8; i < buffersize ; i++){
             if(buffer[i] == '/'){
                 startofcommand = i;
+                break;
             }
         }
     }
@@ -193,8 +205,10 @@ char* parseCommand(char* buffer, int buffersize){
     int o;
     for( o = 0; o < buffersize; o++)
     {
-        if(buffer[o] == '?')
+        if(buffer[o] == '?'){
             querystringval = o;
+            break;
+        }
     }
     // if there are parameters in the query string, parse it and place into bucket.
     if(querystringval != 0){
@@ -206,10 +220,14 @@ char* parseCommand(char* buffer, int buffersize){
         // if there are more parameters, value to 1;
         int moreparameter = 1;
         int p;
+
         while(moreparameter == 1){
+            parameterstring= 0;
+
             for( p = startofstring; p < buffersize ; p++){
                 if(buffer[p] == '&'){
                     startofstring = p+1;
+                    moreparameter = 1;
                     break;
                 }
                 if(buffer[p] == ' '){
@@ -221,7 +239,10 @@ char* parseCommand(char* buffer, int buffersize){
                 parameterstring++;
 
             }
+
             parameter++;
+
+
 
         }
     }
@@ -235,11 +256,8 @@ char* parseCommand(char* buffer, int buffersize){
         requestparse[q] = querystring[numparameter];
         numparameter++;
     }
-    printf("hihi");
-    printf("REQUESTTYPE:%s\n",requestparse[0]);
-    printf("COMMANDTYPE:%s\n",requestparse[1]);
-    printf("QUERYSTRING1%s\n",requestparse[2]);
-    printf("QUERYSTRING2%s\n",requestparse[3]);
+
+
 
     return *requestparse;
 }
