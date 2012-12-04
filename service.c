@@ -170,6 +170,7 @@ char* parseCommand(char* buffer, int buffersize){
         break;
     case ('s'):
         commandtype = "servertime";
+        handleServerTimeRequest(123);
         break;
     case('b'):
         commandtype = "browser";
@@ -275,7 +276,7 @@ int requestIsValid(char *buffer, int buffersize){
     return 0;
 }
 /*
- * Print buffer
+ * Print buffer helper function
  */
 void printBuffer(char *buffer, int buffersize){
     printf("Buffer content: ");
@@ -284,4 +285,46 @@ void printBuffer(char *buffer, int buffersize){
         printf("%c",buffer[i]);
     }
     printf("\n");
+}
+/*
+ * Handles a servertime request from the client
+ */
+void handleServerTimeRequest(int statusCode){
+    char* deliveryCodeMessage = getDeliveryCode(statusCode);
+    int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
+
+    sendback(deliveryCodeMessage,deliveryCodeMessageLength);
+}
+/*
+ * Returns a message corresponding to the delivery code and its length
+ */
+char* getDeliveryCode(int statusCode){
+    char *deliveryCodeMessage;
+
+    if(statusCode == 200){
+        deliveryCodeMessage = "HTTP/1.1 200 OK";
+    }
+    else{
+        deliveryCodeMessage = "HTTP/1.1 404 not found";
+    }
+    return deliveryCodeMessage;
+}
+/*
+ * Gets the size of an array
+ */
+int getArraySize(char* array){
+    int count = 0;
+    int i = 0;
+    while(array[i] != '\0'){
+        count++;
+        i++;
+    }
+    return count;
+}
+/*
+ * Sends a char array over the globally defined socket
+ */
+
+void sendback(char* content, int contentLength){
+
 }
