@@ -12,5 +12,7 @@ void flushCommandBuffer(char* commandBuffer);
 char* parseCommand(char* buffer, int buffersize);
 int requestIsValid(char* buffer, int buffersize);
 void printBuffer(char* buffer, int buffersize);
+void handleServerTime(int i);
+void handleLogin(int i);
 
 #endif
