@@ -16,5 +16,7 @@ void handleServerTimeRequest(int statusCode);
 char* getDeliveryCode(int statusCode);
 int getArraySize(char* array);
 void sendToClient(char* content, int contentLength);
+void handleServerTime(int i);
+void handleLogin(int i);
 
 #endif

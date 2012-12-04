@@ -14,16 +14,15 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <ctype.h>
 
 #include "service.h"
 #include "util.h"
 
 int commandBufferCapcity = 1000;
 int commandBufferContent = 0;
-int resultBufferCapacity = 10;
 int isSocketClosed = 0;
-int clientSocket = -1;
-
+int clientSocket =-1;
 char* requestparse[7];
 
 void handle_client(int socket) {
@@ -31,19 +30,21 @@ void handle_client(int socket) {
     clientSocket = socket;
     while(1){
         if(isSocketClosed){
-            printf("Socket closed. Connection end\n");
+            printf("Socket closed. Connection end");
             return;
         }
 
         receive(socket,commandBuffer);
+        printBuffer(commandBuffer,commandBufferContent);
         if(requestIsValid(commandBuffer,commandBufferContent)){
             parseCommand(commandBuffer, commandBufferContent);
         }
         else{
             printf("Invalid Syntax\n");
         }
-        isSocketClosed = 1;
+
         flushCommandBuffer(commandBuffer);
+        isSocketClosed = 1;
 
     }
 
@@ -71,6 +72,7 @@ void receive(int socket,char* commandBuffer){
         }
         // Check if we need to resize the command array
         if((receivedBytes + currentBufferCopyPos) >= commandBufferCapcity){
+            printf("Resizing\n");
             commandBuffer = resizeCommandArray(commandBuffer);
         }
 
@@ -85,30 +87,23 @@ void receive(int socket,char* commandBuffer){
     }
     while(receivedBytes > 2 && commandBuffer[currentBufferCopyPos-2] != 13 && commandBuffer[currentBufferCopyPos-1] != 10); // while there is data to read
 
-    printf("Done receiving\n");
-    printBuffer(commandBuffer,commandBufferContent);
+    printf("Done receiving");
 }
 
-/*
- * This resizes the command array and copies the old elements over
- */
+
 char * resizeCommandArray(char* commandBuffer){
     // Create a new buffer
     commandBufferCapcity = commandBufferCapcity * 2;
-    printf("Start resizing to %d\n",commandBufferCapcity);
-
     char *newCommandBuffer = malloc(sizeof(char) * commandBufferCapcity);
-    printf("Got resizing\n");
 
     // Copy the old elements over
     int index;
     for(index = 0; index <= commandBufferContent;index++){
         newCommandBuffer[index] = commandBuffer[index];
     }
-    printf("Done resizing\n");
 
     // Delete the old command Buffer
-    free(commandBuffer);
+    //free(commandBuffer);
 
     return newCommandBuffer;
 }
@@ -122,9 +117,6 @@ void flushCommandBuffer(char* commandBuffer){
 }
 
 char* parseCommand(char* buffer, int buffersize){
-
-
-
     char*  querystring[4];
     querystring[1] =malloc(99);
     querystring[2] =malloc(99);
@@ -160,17 +152,39 @@ char* parseCommand(char* buffer, int buffersize){
         }
     }
 
+    int i = 0;
+    int ii = 0;
+    char strservertime[10];
+
+
     //get command type of request.
-    switch(buffer[startofcommand +1]){
+    switch( tolower(buffer[startofcommand +1])){
 
     case('l'):
-        if (buffer[startofcommand + 4] == 'i')
+        if (buffer[startofcommand + 4] == 'i'){
             commandtype = "login";
-        else commandtype = "logout";
+            if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
+                handleLogin(404);
+            }
+        }
+        else{
+            commandtype = "logout";
+        }
         break;
+
     case ('s'):
+        if(buffer[startofcommand + 11] != ' ' && buffer[startofcommand + 11] != '?'){
+            handleServerTimeRequest(404);
+        }
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strservertime[ii] = tolower(buffer[i]);
+            ii++;
+        }
+        if(strcmp(strservertime,"servertime") == 0){
+            handleServerTimeRequest(200);
+        }else handleServerTimeRequest(404);
+
         commandtype = "servertime";
-        handleServerTimeRequest(200);
         break;
     case('b'):
         commandtype = "browser";
@@ -257,39 +271,26 @@ char* parseCommand(char* buffer, int buffersize){
 
     return *requestparse;
 }
-/*
- * Returns 1 if we have a GET or POST at the beginning of the message
- * 0 otherwise
- */
-int requestIsValid(char *buffer, int buffersize){
-    // Check if we have space for a "GET"
-    if(buffersize >= 3){
-        if(buffer[0] == 'G' && buffer[1] == 'E' && buffer[2] == 'T'){
-            return 1;
-        }
-    }
-    if(buffersize >= 4){
-        if(buffer[0] == 'P' && buffer[1] == 'O' && buffer[2] == 'S' && buffer[3] == 'T'){
-            return 1;
-        }
-    }
-    return 0;
-}
+
+
 /*
  * Print buffer helper function
  */
 void printBuffer(char *buffer, int buffersize){
-    printf("Buffer content: ");
+    printf("\nBuffer content: ");
     int i;
     for(i = 0;i <= buffersize;i++){
         printf("%c",buffer[i]);
     }
     printf("\n");
 }
+void handleLogin(int i){
+}
 /*
  * Handles a servertime request from the client
  */
 void handleServerTimeRequest(int statusCode){
+    printf("The status code is %d",statusCode);
     char* deliveryCodeMessage = getDeliveryCode(statusCode);
     int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
 
@@ -326,6 +327,25 @@ int getArraySize(char* array){
  */
 
 void sendToClient(char* content, int contentLength){
-    int bytesToSend = contentLength;
+    //int bytesToSend = contentLength;
     send(clientSocket,content,contentLength,0);
+}
+
+/*
+ * Checks whether we even have a GET or POST request
+ * returns 1 if yes, 0 if not
+ */
+
+int requestIsValid(char *buffer, int buffersize){
+    if(buffersize >= 3){
+        if(buffer[0]=='G' && buffer[1]=='E' && buffer[2]=='T'){
+            return 1;
+        }
+    }
+    if(buffersize >= 4){
+        if(buffer[0]=='P' && buffer[1]=='O' && buffer[2]=='S' && buffer[3]=='T'){
+            return 1;
+        }
+    }
+    return 0;
 }
