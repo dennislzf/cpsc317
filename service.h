@@ -15,6 +15,6 @@ void printBuffer(char* buffer, int buffersize);
 void handleServerTimeRequest(int statusCode);
 char* getDeliveryCode(int statusCode);
 int getArraySize(char* array);
-void sendback(char* content, int contentLength);
+void sendToClient(char* content, int contentLength);
 
 #endif

@@ -170,7 +170,7 @@ char* parseCommand(char* buffer, int buffersize){
         break;
     case ('s'):
         commandtype = "servertime";
-        handleServerTimeRequest(123);
+        handleServerTimeRequest(200);
         break;
     case('b'):
         commandtype = "browser";
@@ -293,7 +293,7 @@ void handleServerTimeRequest(int statusCode){
     char* deliveryCodeMessage = getDeliveryCode(statusCode);
     int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
 
-    sendback(deliveryCodeMessage,deliveryCodeMessageLength);
+    sendToClient(deliveryCodeMessage,deliveryCodeMessageLength);
 }
 /*
  * Returns a message corresponding to the delivery code and its length
@@ -325,6 +325,7 @@ int getArraySize(char* array){
  * Sends a char array over the globally defined socket
  */
 
-void sendback(char* content, int contentLength){
-
+void sendToClient(char* content, int contentLength){
+    int bytesToSend = contentLength;
+    send(clientSocket,content,contentLength,0);
 }
