@@ -445,21 +445,7 @@ void handleLoginRequest(){
  * Handles a servertime request from the client
  */
 void handleServerTimeRequest(){
-    // The delivery code message
-    char* deliveryCodeMessage = getDeliveryCode(200); // assume everything went well. Otherwise 404 would've been called
-    int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
-
-    // The connection message
-    char* connectionMessage = getConnectionMessage(0); // close the connection
-    int connectionMessageLength = getArraySize(connectionMessage);
-
-    // The date message
-    char* dateMessage = getDateMessage();
-    int dateMessageLength = getArraySize(dateMessage);
-
-    sendToClient(deliveryCodeMessage,deliveryCodeMessageLength);
-    printf("CMSG: %s %d\n",connectionMessage,connectionMessageLength);
-    printf("DMSG: %s %d\n",dateMessage,dateMessageLength);
+    printf("Server time");
 }
 /*
  * Returns a message corresponding to the delivery code and its length
@@ -550,8 +536,27 @@ char* getDateMessage(){
 void handleLogoutRequest(){
     printf("logout");
 }
+/*
+ * Sends a 404 back to the client
+ */
 void throw404(){
     printf("404 error");
+    // The delivery code message
+    char* deliveryCodeMessage = getDeliveryCode(200); // assume everything went well. Otherwise 404 would've been called
+    int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
+
+    // The connection message
+    char* connectionMessage = getConnectionMessage(0); // close the connection
+    int connectionMessageLength = getArraySize(connectionMessage);
+
+    // The date message
+    char* dateMessage = getDateMessage();
+    int dateMessageLength = getArraySize(dateMessage);
+
+    sendToClient(deliveryCodeMessage,deliveryCodeMessageLength);
+    printf("CMSG: %s %d\n",connectionMessage,connectionMessageLength);
+    printf("DMSG: %s %d\n",dateMessage,dateMessageLength);
+
 }
 void handleBrowserRequest(){
     printf("browser");
