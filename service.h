@@ -14,6 +14,7 @@ int requestIsValid(char* buffer, int buffersize);
 void printBuffer(char* buffer, int buffersize);
 char* getDeliveryCode(int statusCode);
 char* getConnectionMessage(int command);
+char* getCacheMessage(int command);
 char* getDateMessage();
 int getArraySize(char* array);
 void handleServerTimeRequest();

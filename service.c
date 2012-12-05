@@ -516,6 +516,28 @@ char* getConnectionMessage(int command){
     return connectionMessage;
 }
 /*
+ * Gets the cache control setting string
+ * 0 - no cache
+ * 1 - private
+ * 2 - public
+*/
+char* getCacheMessage(int command){
+    char *cacheMessage;
+
+    if(command == 0){
+        cacheMessage = "Cache-Control: no-cache";
+    }
+    else if(command == 1){
+        cacheMessage = "Cache-Control: private";
+    }
+    else{
+        cacheMessage = "Cache-Control: public";
+    }
+    return cacheMessage;
+
+}
+
+/*
  * Gets the current date message string
  */
 char* getDateMessage(){
@@ -540,9 +562,9 @@ void handleLogoutRequest(){
  * Sends a 404 back to the client
  */
 void throw404(){
-    printf("404 error");
+    printf("404 error\n");
     // The delivery code message
-    char* deliveryCodeMessage = getDeliveryCode(200); // assume everything went well. Otherwise 404 would've been called
+    char* deliveryCodeMessage = getDeliveryCode(404); // assume everything went well. Otherwise 404 would've been called
     int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
 
     // The connection message
@@ -553,10 +575,20 @@ void throw404(){
     char* dateMessage = getDateMessage();
     int dateMessageLength = getArraySize(dateMessage);
 
-    sendToClient(deliveryCodeMessage,deliveryCodeMessageLength);
-    printf("CMSG: %s %d\n",connectionMessage,connectionMessageLength);
-    printf("DMSG: %s %d\n",dateMessage,dateMessageLength);
+    // The date message
+    char* cacheMessage = getCacheMessage(0);
+    int cacheMessageLength = getArraySize(cacheMessage);
 
+    // Content message
+    char * contentMessage = "Command not found";
+    int contentMessageLength = 17;
+    sendToClient(deliveryCodeMessage,deliveryCodeMessageLength);
+
+    printf("%s %d\n",deliveryCodeMessage,deliveryCodeMessageLength);
+    printf("%s %d\n",connectionMessage,connectionMessageLength);
+    printf("%s %d\n",dateMessage,dateMessageLength);
+    printf("%s %d\n",cacheMessage,cacheMessageLength);
+    printf("%s %d\n",contentMessage,contentMessageLength);
 }
 void handleBrowserRequest(){
     printf("browser");
