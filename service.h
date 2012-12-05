@@ -29,4 +29,13 @@ void handleDelCartRequest();
 void handleRedirectRequest();
 void handleGetFileRequest();
 void throw404();
+ void parseClose(char* buffer);
+ void parseCheckout(char* buffer) ; 
+  void parseBrowser(char* buffer);
+ void parseRedirect(char* buffer);
+ void parseGetFile(char* buffer);
+void parseAddCart(char* buffer);
+void parseDelCart(char* buffer);
+ void parseCheckout(char* buffer);
+ void parseClose(char* buffer);
 #endif
