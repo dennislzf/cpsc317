@@ -211,7 +211,7 @@ void parseCommand(char* buffer, int buffersize){
     }
 }
 
-void  parsePutFile(char* buffer,int startofcommand,int buffersize){
+void parsePutFile(char* buffer,int startofcommand,int buffersize){
     char* querystring = malloc(999);
     char* putfilestring = malloc(99);
     char* contentstring = malloc(999);
@@ -243,7 +243,7 @@ void  parsePutFile(char* buffer,int startofcommand,int buffersize){
     if(strstr(buffer,"?content=") != NULL || strstr(buffer,"&content=") != NULL){
         querystring = strstr(buffer,"content=");
 
-        for(i = 9; i <999; i ++){
+        for(i = 8; i <999; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&'){
                 break;
             }
@@ -272,6 +272,7 @@ void  parsePutFile(char* buffer,int startofcommand,int buffersize){
             putfilestring[k] = '\0';
             contentstring[kk] = '\0';
             contentstringlength = kk;
+            putfilelength = k;
             handlePutFileRequest(putfilestring,contentstring,putfilelength,contentstringlength);
         }else {
 
@@ -314,21 +315,25 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
     int ii = 0;
     int k = 0;
     int usernamelength = 0;
-
-    if(strstr(buffer,"?username=") == NULL || strstr(buffer,"&username=") == NULL){
+    if(strstr(buffer,"?username=") != NULL || strstr(buffer,"&username=") != NULL){
         querystring = strstr(buffer,"username=");
-        for(i = 10; i <99; i ++){
-            if(querystring[i] == ' ' || querystring[i] == '&'){
+
+        for(i = 9; i < 99; i ++){
+            if(querystring[i] == ' ' || querystring[i] == '&' || querystring[i] == 0){
                 break;
             }
+            printf("adding %c\n", querystring[i]);
             usernamestring[k] = querystring[i];
-            k++;
+            usernamestring[++k] = '\0';
+            printf("new string %s\n", usernamestring);
+
         }
+
     }else{
         throw404();
         return;
     }
-
+    printf("%s \n\n",usernamestring);
 
 
     //check if client types login
@@ -341,12 +346,13 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
         }
 
         if(strncmp(strcheck,"login",5) == 0){
+            printf("Hello there %s %d",usernamestring,k);
             usernamelength = strlen(usernamestring);
-
             handleLoginRequest(usernamestring,usernamelength);
-
         }else {
+
             throw404();
+
         }
     }
 
@@ -412,7 +418,7 @@ void parseRedirect(char* buffer, int startofcommand,int buffersize){
     if(strstr(buffer,"?redirect=") != NULL || strstr(buffer,"&redirect=") != NULL){
         querystring = strstr(buffer,"redirect=");
 
-        for(i = 10; i <99; i ++){
+        for(i = 9; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
@@ -461,7 +467,7 @@ void parseGetFile(char* buffer, int startofcommand,int buffersize){
     if(strstr(buffer,"?filename=") != NULL || strstr(buffer,"&filename=") != NULL){
         querystring = strstr(buffer,"filename=");
 
-        for(i = 10; i <99; i ++){
+        for(i = 9; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
@@ -510,7 +516,7 @@ void parseAddCart(char* buffer, int startofcommand,int buffersize){
     if(strstr(buffer,"?item=") != NULL || strstr(buffer,"&item=") != NULL){
         querystring = strstr(buffer,"item=");
 
-        for(i = 6; i <99; i ++){
+        for(i = 5; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
@@ -560,7 +566,7 @@ void parseDelCart(char* buffer, int startofcommand,int buffersize){
     if(strstr(buffer,"?itemnr=") != NULL || strstr(buffer,"&itemnr=") != NULL){
         querystring = strstr(buffer,"itemnr=");
 
-        for(i = 8; i <99; i ++){
+        for(i = 7; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
@@ -622,7 +628,6 @@ void parseClose(char* buffer, int startofcommand,int buffersize) {
     }
 
 }
-
 /*
  * Print buffer helper function
  */
@@ -641,12 +646,12 @@ void handleLoginRequest(char* querystring, int querystringsize){
     // First do some cleanup. This is a bug, fix it later if there is time
     char *username = malloc(querystringsize);
     strncpy(username,querystring,querystringsize);
-    username[querystringsize] = '\0';
+    //    username[querystringsize] = '\0';
 
     // Set the local user to logged in
     loggedInUserName = username;
     isLoggedIn = 1;
-    printf("Logging in %s\n",querystring);
+    printf("Logging in %s \n",querystring);
     // Get the various header messages
 
     //    // The delivery code message
