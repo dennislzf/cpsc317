@@ -41,10 +41,6 @@ void handle_client(int socket) {
         if(requestIsValid(commandBuffer,commandBufferContent)){
             parseCommand(commandBuffer, commandBufferContent);
         }
-        else{
-            printf("Invalid Syntax\n");
-        }
-
         flushCommandBuffer(commandBuffer);
         isSocketClosed = 1;
 
@@ -74,7 +70,6 @@ void receive(int socket,char* commandBuffer){
         }
         // Check if we need to resize the command array
         if((receivedBytes + currentBufferCopyPos) >= commandBufferCapcity){
-            printf("Resizing\n");
             commandBuffer = resizeCommandArray(commandBuffer);
         }
 
@@ -87,9 +82,8 @@ void receive(int socket,char* commandBuffer){
 
         commandBufferContent = currentBufferCopyPos;
     }
-    while(receivedBytes > 2 && commandBuffer[currentBufferCopyPos-2] != 13 && commandBuffer[currentBufferCopyPos-1] != 10); // while there is data to read
-
-    printf("Done receiving\n");
+    // while there is data to read
+    while(receivedBytes > 2 && commandBuffer[currentBufferCopyPos-2] != 13 && commandBuffer[currentBufferCopyPos-1] != 10);
 }
 
 
@@ -622,38 +616,27 @@ void handleServerTimeRequest(){
     // The date message
     char* dateMessage = getGMTDateMessage();
     int dateLength = strlen(dateMessage);
-    printf("%d%d%d",deliveryLength,connectionLength,dateLength);
-    //    // Content message
-    //    char *contentMessageShort = getGMTDateMessage(); // get the current local server time
-    //    int contentLength = strlen(contentMessageShort); // need to prepend a newline
-    //    char *contentMessage = malloc(contentLength + 1);
-    //    strcpy(contentMessage,"\n");
-    //    strcat(contentMessage,contentMessageShort);
-    ////    free(contentMessageShort);              // clear out the short version of the time string
-    //    contentLength++;
+    // Content message
+    char *contentMessage = getLocalDateMessage(); // get the current local server time
+    int contentLength = strlen(contentMessage); // need to prepend a newline
 
-    //    // The cache message
-    //    char* cacheMessage = getCacheMessage(0); // no cache
-    //    int cacheLength = strlen(cacheMessage);
+    // The cache message
+    char* cacheMessage = getCacheMessage(0); // no cache
+    int cacheLength = strlen(cacheMessage);
 
-    //    // Copy together all the strings
-    //    char* finalString;
-    //    finalString = malloc(deliveryLength + connectionLength + dateLength + cacheLength + contentLength);
-    //    strcpy(finalString, deliveryCodeMessage);
-    //    strcat(finalString, connectionMessage);
-    //    strcat(finalString, dateMessage);
-    //    strcat(finalString, cacheMessage);
-    //    strcat(finalString, contentMessage);
+    // Copy together all the strings
+    char* finalString;
+    finalString = malloc(deliveryLength + connectionLength + dateLength + cacheLength + contentLength);
+    strcpy(finalString, deliveryCodeMessage);
+    strcat(finalString, connectionMessage);
+    strcat(finalString, dateMessage);
+    strcat(finalString, cacheMessage);
+    strcat(finalString, contentMessage);
 
-    //    sendToClient(finalString,strlen(finalString));
+    sendToClient(finalString,strlen(finalString));
 
     // Free memory
-    //    free(deliveryCodeMessage);
-    //    free(connectionMessage);
-    //    free(dateMessage);
-    //    free(cacheMessage);
-    //    free(contentMessage);
-
+    free(finalString);
 }
 /*
  * Returns a message corresponding to the delivery code and its length
@@ -743,7 +726,7 @@ char* getGMTDateMessage(){
     struct tm * currentTime;
     time(&timeData);
     currentTime = gmtime(&timeData);
-    strftime(dateMessage,256,"%a, %d %b %Y %H:%M:%S",currentTime);
+    strftime(dateMessage,256,"%a, %d %b %Y %H:%M:%S\n",currentTime);
 
     return dateMessage;
 }
@@ -758,8 +741,8 @@ char* getLocalDateMessage(){
     time_t timeData;
     struct tm * currentTime;
     time(&timeData);
-    currentTime = gmtime(&timeData);
-    strftime(dateMessage,256,"%a, %d %b %Y %H:%M:%S",currentTime);
+    currentTime = localtime(&timeData);
+    strftime(dateMessage,256,"\n%a, %d %b %Y %H:%M:%S\n",currentTime);
 
     return dateMessage;
 }
@@ -804,11 +787,7 @@ void throw404(){
     sendToClient(finalString,strlen(finalString));
 
     // Free memory
-    free(deliveryCodeMessage);
-    free(connectionMessage);
-    free(dateMessage);
-    free(cacheMessage);
-    free(contentMessage);
+    free(finalString);
 
 
 }
