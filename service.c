@@ -218,7 +218,28 @@ void parseCommand(char* buffer, int buffersize){
     }
 }
 void parseLogout(char* buffer, int startofcommand,int buffersize){
-    
+    char* strcheck= malloc(99);
+    int i;
+    int ii = 0;
+    //check if client types login
+    if(buffer[startofcommand + 7] != ' ' && buffer[startofcommand + 7] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"logout",6) == 0){
+
+            handleLogoutRequest();
+        }else {
+
+            throw404();
+
+        }
+    }
+
 }
 void parseLogin(char* buffer, int startofcommand,int buffersize){
     char* querystring = malloc(99);
@@ -228,7 +249,6 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
     int ii = 0;
     int k = 0;
     int usernamelength = 0;
-    printf("it's here: %s",strstr(buffer,"?username="));
     if(strstr(buffer,"?username=") != NULL || strstr(buffer,"&username=") != NULL){
         querystring = strstr(buffer,"username=");
 
@@ -240,7 +260,7 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
             usernamestring[k] = querystring[i];
             k++;
         }
-        
+
     }else{
 
         throw404();
@@ -259,7 +279,7 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
         }
 
         if(strncmp(strcheck,"login",5) == 0){
-            usernamelength = k;
+            usernamelength = strlen(usernamestring);
             handleLoginRequest(usernamestring,usernamelength);
         }else {
 
@@ -271,24 +291,273 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
 }
 void parseCheckout(char* buffer, int startofcommand,int buffersize ) {
 
+    char* strcheck= malloc(99);
+    int i;
+    int ii = 0;
+    //check if client types login
+    if(buffer[startofcommand + 9] != ' ' && buffer[startofcommand + 9] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"checkout",8) == 0){
+
+            handleCheckoutRequest();
+        }else {
+
+            throw404();
+
+        }
+    }
+
 }
 void parseBrowser(char* buffer, int startofcommand,int buffersize){
 
+    char* strcheck = malloc(99);
+    int i;
+    int ii = 0;
+    //check if client types login
+    if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"browser",7) == 0){
+
+            handleBrowserRequest();
+        }else {
+
+            throw404();
+
+        }
+    }
+
 }
 void parseRedirect(char* buffer, int startofcommand,int buffersize){
+    char* querystring = malloc(99);
+    char* redirectstring = malloc(99);
+    char* strcheck = malloc(99);
+    int i = 0;
+    int ii = 0;
+    int k = 0;
+    int redirectlength = 0;
+    if(strstr(buffer,"?redirect=") != NULL || strstr(buffer,"&redirect=") != NULL){
+        querystring = strstr(buffer,"redirect=");
+
+        for(i = 9; i <99; i ++){
+            if(querystring[i] == ' ' || querystring[i] == '&' ){
+                break;
+            }
+
+            redirectstring[k] = querystring[i];
+            k++;
+        }
+
+    }else{
+
+        throw404();
+        return;
+    }
+
+
+
+    //check if client types login
+    if(buffer[startofcommand + 9] != ' ' && buffer[startofcommand + 9] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"redirect",8) == 0){
+            redirectlength = k;
+            redirectstring[k] = '\0';
+            handleRedirectRequest(redirectstring,redirectlength);
+        }else {
+
+            throw404();
+
+        }
+    }
 
 }
 void parseGetFile(char* buffer, int startofcommand,int buffersize){
+    char* querystring = malloc(99);
+    char* filenamestring = malloc(99);
+    char* strcheck = malloc(99);
+    int i = 0;
+    int ii = 0;
+    int k = 0;
+    int filenamelength = 0;
+    if(strstr(buffer,"?filename=") != NULL || strstr(buffer,"&filename=") != NULL){
+        querystring = strstr(buffer,"filename=");
+
+        for(i = 9; i <99; i ++){
+            if(querystring[i] == ' ' || querystring[i] == '&' ){
+                break;
+            }
+
+            filenamestring[k] = querystring[i];
+            k++;
+        }
+
+    }else{
+
+        throw404();
+        return;
+    }
+
+
+
+    //check if client types login
+    if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"getfile",8) == 0){
+            filenamelength = k;
+            filenamestring[k] = '\0';
+            handleGetFileRequest(filenamestring,filenamelength);
+        }else {
+
+            throw404();
+
+        }
+    }
 
 }
 void parseAddCart(char* buffer, int startofcommand,int buffersize){
-    
+    char* querystring = malloc(99);
+    char* addcartstring = malloc(99);
+    char* strcheck = malloc(99);
+    int i = 0;
+    int ii = 0;
+    int k = 0;
+    int addcartlength = 0;
+    if(strstr(buffer,"?item=") != NULL || strstr(buffer,"&item=") != NULL){
+        querystring = strstr(buffer,"item=");
+
+        for(i = 9; i <99; i ++){
+            if(querystring[i] == ' ' || querystring[i] == '&' ){
+                break;
+            }
+
+            addcartstring[k] = querystring[i];
+            k++;
+        }
+
+    }else{
+
+        throw404();
+        return;
+    }
+
+
+
+    //check if client types login
+    if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"addcart",8) == 0){
+
+            addcartstring[k] = '\0';
+            addcartlength = k;
+            handleAddCartRequest(addcartstring,addcartlength);
+        }else {
+
+            throw404();
+
+        }
+    }
+
 }
 void parseDelCart(char* buffer, int startofcommand,int buffersize){
-    
+    char* querystring = malloc(99);
+    char* delstring = malloc(99);
+    char* strcheck = malloc(99);
+    int i = 0;
+    int ii = 0;
+    int k = 0;
+
+    if(strstr(buffer,"?itemnr=") != NULL || strstr(buffer,"&itemnr=") != NULL){
+        querystring = strstr(buffer,"itemnr=");
+
+        for(i = 9; i <99; i ++){
+            if(querystring[i] == ' ' || querystring[i] == '&' ){
+                break;
+            }
+
+            delstring[k] = querystring[i];
+            k++;
+        }
+
+    }else{
+
+        throw404();
+        return;
+    }
+
+
+
+    //check if client types login
+    if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"delcart",7) == 0){
+            delstring[k] = '\0';
+
+            handleDelCartRequest(delstring);
+        }else {
+
+            throw404();
+
+        }
+    }
 }
 
 void parseClose(char* buffer, int startofcommand,int buffersize) {
+    char* strcheck= malloc(99);;
+    int i;
+    int ii = 0;
+    //check if client types login
+    if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"close",5) == 0){
+
+            handleCloseRequest();
+        }else {
+
+            throw404();
+
+        }
+    }
 
 }
 
@@ -314,12 +583,77 @@ void handleLoginRequest(char* querystring, int querystringsize){
     username[querystringsize] = '\0';
 
     // Set the local user to logged in
+    loggedInUserName = username;
+    isLoggedIn = 1;
+
+    // Get the various header messages
+
+    //    // The delivery code message
+    //    char* deliveryCodeMessage = getDeliveryCode(200);
+    //    int deliveryLength = strlen(deliveryCodeMessage);
+
+    //    // The connection message
+    //    char* connectionMessage = getConnectionMessage(0); // close the connection
+    //    int connectionLength = strlen(connectionMessage);
+
+    //    // The date message
+    //    char* dateMessage = getDateMessage();
+    //    int dateLength = strlen(dateMessage);
+
+    //    // Content message
+    //    char * contentMessage = "\nCommand not found\n";
+    //    int contentLength = strlen(contentMessage);
+
+
 }
 /*
  * Handles a servertime request from the client
  */
 void handleServerTimeRequest(){
-    printf("Server time");
+    printf("Server time\n");
+    // The delivery code message
+    char* deliveryCodeMessage = getDeliveryCode(200);
+    int deliveryLength = strlen(deliveryCodeMessage);
+
+    // The connection message
+    char* connectionMessage = getConnectionMessage(1); // keep alive
+    int connectionLength = strlen(connectionMessage);
+
+    // The date message
+    char* dateMessage = getGMTDateMessage();
+    int dateLength = strlen(dateMessage);
+    printf("%d%d%d",deliveryLength,connectionLength,dateLength);
+    //    // Content message
+    //    char *contentMessageShort = getGMTDateMessage(); // get the current local server time
+    //    int contentLength = strlen(contentMessageShort); // need to prepend a newline
+    //    char *contentMessage = malloc(contentLength + 1);
+    //    strcpy(contentMessage,"\n");
+    //    strcat(contentMessage,contentMessageShort);
+    ////    free(contentMessageShort);              // clear out the short version of the time string
+    //    contentLength++;
+
+    //    // The cache message
+    //    char* cacheMessage = getCacheMessage(0); // no cache
+    //    int cacheLength = strlen(cacheMessage);
+
+    //    // Copy together all the strings
+    //    char* finalString;
+    //    finalString = malloc(deliveryLength + connectionLength + dateLength + cacheLength + contentLength);
+    //    strcpy(finalString, deliveryCodeMessage);
+    //    strcat(finalString, connectionMessage);
+    //    strcat(finalString, dateMessage);
+    //    strcat(finalString, cacheMessage);
+    //    strcat(finalString, contentMessage);
+
+    //    sendToClient(finalString,strlen(finalString));
+
+    // Free memory
+    //    free(deliveryCodeMessage);
+    //    free(connectionMessage);
+    //    free(dateMessage);
+    //    free(cacheMessage);
+    //    free(contentMessage);
+
 }
 /*
  * Returns a message corresponding to the delivery code and its length
@@ -400,18 +734,31 @@ char* getCacheMessage(int command){
 }
 
 /*
- * Gets the current date message string
+ * Gets the current date message string in GMT
  */
-char* getDateMessage(){
+char* getGMTDateMessage(){
     char *dateMessage = malloc(sizeof(char) * 256);
 
     time_t timeData;
     struct tm * currentTime;
     time(&timeData);
     currentTime = gmtime(&timeData);
-    if(currentTime == 0){
+    strftime(dateMessage,256,"%a, %d %b %Y %H:%M:%S",currentTime);
 
-    }
+    return dateMessage;
+}
+
+
+/*
+ * Gets the current date message string in GMT
+ */
+char* getLocalDateMessage(){
+    char *dateMessage = malloc(sizeof(char) * 256);
+
+    time_t timeData;
+    struct tm * currentTime;
+    time(&timeData);
+    currentTime = gmtime(&timeData);
     strftime(dateMessage,256,"%a, %d %b %Y %H:%M:%S",currentTime);
 
     return dateMessage;
@@ -434,16 +781,16 @@ void throw404(){
     int connectionLength = strlen(connectionMessage);
 
     // The date message
-    char* dateMessage = getDateMessage();
+    char* dateMessage = getGMTDateMessage();
     int dateLength = strlen(dateMessage);
-
-    // The date message
-    char* cacheMessage = getCacheMessage(0);
-    int cacheLength = strlen(cacheMessage);
 
     // Content message
     char * contentMessage = "\nCommand not found\n";
     int contentLength = strlen(contentMessage);
+
+    // The cache message
+    char* cacheMessage = getCacheMessage(0);
+    int cacheLength = strlen(cacheMessage);
 
     // Copy together all the strings
     char* finalString;
@@ -456,6 +803,14 @@ void throw404(){
 
     sendToClient(finalString,strlen(finalString));
 
+    // Free memory
+    free(deliveryCodeMessage);
+    free(connectionMessage);
+    free(dateMessage);
+    free(cacheMessage);
+    free(contentMessage);
+
+
 }
 void handleBrowserRequest(){
     printf("browser");
@@ -463,18 +818,18 @@ void handleBrowserRequest(){
 void handleCloseRequest(){
     printf("close");
 }
-void handleAddCartRequest(){
+void handleAddCartRequest(char* querystring, int querystringlength){
     printf("addcart");
 }
-void handleDelCartRequest(){
+void handleDelCartRequest(char* querystring){
     printf("delcart");
 }
 void handleCheckoutRequest(){
     printf("checkout");
 }
-void handleGetFileRequest(){
+void handleGetFileRequest(char* querystring, int querystringlength){
     printf("getfile");
 }
-void handleRedirectRequest(){
+void handleRedirectRequest(char* querystring, int querystringlength){
     printf("redirect");
 }
