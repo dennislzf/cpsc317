@@ -16,7 +16,6 @@ char* getDeliveryCode(int statusCode);
 char* getConnectionMessage(int command);
 char* getCacheMessage(int command);
 char* getDateMessage();
-int getArraySize(char* array);
 void handleServerTimeRequest();
 void sendToClient(char* content, int contentLength);
 void handleLoginRequest(char* querystring, int querystringsize);

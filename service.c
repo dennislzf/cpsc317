@@ -318,24 +318,12 @@ char* getDeliveryCode(int statusCode){
     char *deliveryCodeMessage;
 
     if(statusCode == 200){
-        deliveryCodeMessage = "HTTP/1.1 200 OK";
+        deliveryCodeMessage = "HTTP/1.1 200 OK\n";
     }
     else{
-        deliveryCodeMessage = "HTTP/1.1 404 not found";
+        deliveryCodeMessage = "HTTP/1.1 404 not found\n";
     }
     return deliveryCodeMessage;
-}
-/*
- * Gets the size of an array
- */
-int getArraySize(char* array){
-    int count = 0;
-    int i = 0;
-    while(array[i] != '\0'){
-        count++;
-        i++;
-    }
-    return count;
 }
 /*
  * Sends a char array over the globally defined socket
@@ -372,10 +360,10 @@ char* getConnectionMessage(int command){
     char *connectionMessage;
 
     if(command == 1){
-        connectionMessage = "Connection: keep alive";
+        connectionMessage = "Connection: keep alive\n";
     }
     else{
-        connectionMessage = "Connection: close";
+        connectionMessage = "Connection: close\n";
     }
     return connectionMessage;
 }
@@ -389,13 +377,13 @@ char* getCacheMessage(int command){
     char *cacheMessage;
 
     if(command == 0){
-        cacheMessage = "Cache-Control: no-cache";
+        cacheMessage = "Cache-Control: no-cache\n";
     }
     else if(command == 1){
-        cacheMessage = "Cache-Control: private";
+        cacheMessage = "Cache-Control: private\n";
     }
     else{
-        cacheMessage = "Cache-Control: public";
+        cacheMessage = "Cache-Control: public\n";
     }
     return cacheMessage;
 
@@ -428,31 +416,36 @@ void handleLogoutRequest(){
 void throw404(){
     printf("404 error\n");
     // The delivery code message
-    char* deliveryCodeMessage = getDeliveryCode(404); // assume everything went well. Otherwise 404 would've been called
-    int deliveryCodeMessageLength = getArraySize(deliveryCodeMessage);
+    char* deliveryCodeMessage = getDeliveryCode(404);
+    int deliveryLength = strlen(deliveryCodeMessage);
 
     // The connection message
     char* connectionMessage = getConnectionMessage(0); // close the connection
-    int connectionMessageLength = getArraySize(connectionMessage);
+    int connectionLength = strlen(connectionMessage);
 
     // The date message
     char* dateMessage = getDateMessage();
-    int dateMessageLength = getArraySize(dateMessage);
+    int dateLength = strlen(dateMessage);
 
     // The date message
     char* cacheMessage = getCacheMessage(0);
-    int cacheMessageLength = getArraySize(cacheMessage);
+    int cacheLength = strlen(cacheMessage);
 
     // Content message
-    char * contentMessage = "Command not found";
-    int contentMessageLength = 17;
-    sendToClient(deliveryCodeMessage,deliveryCodeMessageLength);
+    char * contentMessage = "\nCommand not found\n";
+    int contentLength = strlen(contentMessage);
 
-    printf("%s %d\n",deliveryCodeMessage,deliveryCodeMessageLength);
-    printf("%s %d\n",connectionMessage,connectionMessageLength);
-    printf("%s %d\n",dateMessage,dateMessageLength);
-    printf("%s %d\n",cacheMessage,cacheMessageLength);
-    printf("%s %d\n",contentMessage,contentMessageLength);
+    // Copy together all the strings
+    char* finalString;
+    finalString = malloc(deliveryLength + connectionLength + dateLength + cacheLength + contentLength);
+    strcpy(finalString, deliveryCodeMessage);
+    strcat(finalString, connectionMessage);
+    strcat(finalString, dateMessage);
+    strcat(finalString, cacheMessage);
+    strcat(finalString, contentMessage);
+
+    sendToClient(finalString,strlen(finalString));
+
 }
 void handleBrowserRequest(){
     printf("browser");
