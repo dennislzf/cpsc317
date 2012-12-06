@@ -24,6 +24,8 @@ int commandBufferCapcity = 1000;
 int commandBufferContent = 0;
 int isSocketClosed = 0;
 int clientSocket =-1;
+int isLoggedIn = 0;
+char *loggedInUserName;
 char* requestparse[7];
 
 void handle_client(int socket) {
@@ -117,10 +119,10 @@ void flushCommandBuffer(char* commandBuffer){
 }
 
 void parseCommand(char* buffer, int buffersize){
- 
+
     char* requesttype;
 
-   
+
     int startofcommand;
     
     //if request type is GET;
@@ -161,8 +163,8 @@ void parseCommand(char* buffer, int buffersize){
         if (buffer[startofcommand + 4] == 'i'){
             parseLogin(buffer,startofcommand,buffersize);
         }
-      
-            
+
+
         parseLogout(buffer,startofcommand,buffersize);
 
         break;
@@ -188,7 +190,7 @@ void parseCommand(char* buffer, int buffersize){
 
         break;
     case('b'):
-    parseBrowser(buffer,startofcommand,buffersize);
+        parseBrowser(buffer,startofcommand,buffersize);
         break;
     case('r'):
         parseRedirect(buffer,startofcommand,buffersize);
@@ -197,17 +199,17 @@ void parseCommand(char* buffer, int buffersize){
         parseGetFile(buffer,startofcommand,buffersize);
         break;
     case('a'):
-       parseAddCart(buffer,startofcommand,buffersize);
+        parseAddCart(buffer,startofcommand,buffersize);
         break;
     case('d'):
-       parseDelCart(buffer,startofcommand,buffersize);
+        parseDelCart(buffer,startofcommand,buffersize);
         break;
     case('c'):
         if(buffer[startofcommand + 2] == 'h'){
-           parseCheckout(buffer,startofcommand,buffersize);
+            parseCheckout(buffer,startofcommand,buffersize);
         }
         else{
-           parseClose(buffer,startofcommand,buffersize);
+            parseClose(buffer,startofcommand,buffersize);
         }
         break;
     default:
@@ -226,59 +228,59 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
     int ii = 0;
     int k = 0;
     int usernamelength = 0;
-printf("it's here: %s",strstr(buffer,"?username="));
+    printf("it's here: %s",strstr(buffer,"?username="));
     if(strstr(buffer,"?username=") != NULL || strstr(buffer,"&username=") != NULL){
         querystring = strstr(buffer,"username=");
-       
+
         for(i = 9; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&'){
                 break;
             }
-       
+
             usernamestring[k] = querystring[i];
             k++;
         }
         
     }else{
- 
+
         throw404();
         return;
     }
-  
-  
+
+
 
     //check if client types login
-       if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
-                throw404();
-            }else{
-                for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                    strcheck[ii] = tolower(buffer[i]);
-                    ii++;
-                }
-
-                if(strncmp(strcheck,"login",5) == 0){
-		    usernamelength = strlen(usernamestring);
-                    handleLoginRequest(usernamestring,usernamelength);
-                }else {
-
-                    throw404();
-
-            }
+    if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
         }
-     
- }
- void parseCheckout(char* buffer, int startofcommand,int buffersize ) {
-     
- }
-  void parseBrowser(char* buffer, int startofcommand,int buffersize){
-      
+
+        if(strncmp(strcheck,"login",5) == 0){
+            usernamelength = k;
+            handleLoginRequest(usernamestring,usernamelength);
+        }else {
+
+            throw404();
+
+        }
+    }
+
 }
- void parseRedirect(char* buffer, int startofcommand,int buffersize){
-     
- }
- void parseGetFile(char* buffer, int startofcommand,int buffersize){
-     
- }
+void parseCheckout(char* buffer, int startofcommand,int buffersize ) {
+
+}
+void parseBrowser(char* buffer, int startofcommand,int buffersize){
+
+}
+void parseRedirect(char* buffer, int startofcommand,int buffersize){
+
+}
+void parseGetFile(char* buffer, int startofcommand,int buffersize){
+
+}
 void parseAddCart(char* buffer, int startofcommand,int buffersize){
     
 }
@@ -286,9 +288,9 @@ void parseDelCart(char* buffer, int startofcommand,int buffersize){
     
 }
 
- void parseClose(char* buffer, int startofcommand,int buffersize) {
-     
- }
+void parseClose(char* buffer, int startofcommand,int buffersize) {
+
+}
 
 
 /*
@@ -302,8 +304,16 @@ void printBuffer(char *buffer, int buffersize){
     }
     printf("\n");
 }
-
+/*
+ * Logs in the client with the username and sets some local variables
+ */
 void handleLoginRequest(char* querystring, int querystringsize){
+    // First do some cleanup. This is a bug, fix it later if there is time
+    char *username = malloc(querystringsize+1);
+    strncpy(username,querystring,querystringsize);
+    username[querystringsize] = '\0';
+
+    // Set the local user to logged in
 }
 /*
  * Handles a servertime request from the client
