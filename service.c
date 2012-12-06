@@ -157,10 +157,9 @@ void parseCommand(char* buffer, int buffersize){
         if (buffer[startofcommand + 4] == 'i'){
             parseLogin(buffer,startofcommand,buffersize);
         }
-
-
-        parseLogout(buffer,startofcommand,buffersize);
-
+        else{
+            parseLogout(buffer,startofcommand,buffersize);
+        }
         break;
 
     case ('s'):
@@ -211,6 +210,78 @@ void parseCommand(char* buffer, int buffersize){
         break;
     }
 }
+
+void  parsePutFile(char* buffer,int startofcommand,int buffersize){
+    char* querystring = malloc(999);
+    char* putfilestring = malloc(99);
+    char* contentstring = malloc(999);
+    char* strcheck = malloc(99);
+    int i = 0;
+    int ii = 0;
+    int k = 0;
+    int kk = 0;
+    int putfilelength = 0;
+    int contentstringlength =0;
+    if(strstr(buffer,"?filename=") != NULL || strstr(buffer,"&filename=") != NULL){
+        querystring = strstr(buffer,"filename=");
+
+        for(i = 10; i <99; i ++){
+            if(querystring[i] == ' ' || querystring[i] == '&'){
+                break;
+            }
+
+            putfilestring[k] = querystring[i];
+            k++;
+        }
+
+    }else{
+
+        throw404();
+        return;
+    }
+
+    if(strstr(buffer,"?content=") != NULL || strstr(buffer,"&content=") != NULL){
+        querystring = strstr(buffer,"content=");
+
+        for(i = 9; i <999; i ++){
+            if(querystring[i] == ' ' || querystring[i] == '&'){
+                break;
+            }
+
+            contentstring[kk] = querystring[i];
+            kk++;
+        }
+
+    }else{
+
+        throw404();
+        return;
+    }
+
+
+    //check if client types login
+    if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
+        throw404();
+    }else{
+        for (i = startofcommand + 1; i <startofcommand + 11;i++){
+            strcheck[ii] = tolower(buffer[i]);
+            ii++;
+        }
+
+        if(strncmp(strcheck,"putfile",7) == 0){
+            putfilestring[k] = '\0';
+            contentstring[kk] = '\0';
+            contentstringlength = kk;
+            handlePutFileRequest(putfilestring,contentstring,putfilelength,contentstringlength);
+        }else {
+
+            throw404();
+
+        }
+    }
+
+}
+
 void parseLogout(char* buffer, int startofcommand,int buffersize){
     char* strcheck= malloc(99);
     int i;
@@ -243,20 +314,17 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
     int ii = 0;
     int k = 0;
     int usernamelength = 0;
-    if(strstr(buffer,"?username=") != NULL || strstr(buffer,"&username=") != NULL){
-        querystring = strstr(buffer,"username=");
 
-        for(i = 9; i <99; i ++){
+    if(strstr(buffer,"?username=") == NULL || strstr(buffer,"&username=") == NULL){
+        querystring = strstr(buffer,"username=");
+        for(i = 10; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&'){
                 break;
             }
-
             usernamestring[k] = querystring[i];
             k++;
         }
-
     }else{
-
         throw404();
         return;
     }
@@ -274,11 +342,11 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
 
         if(strncmp(strcheck,"login",5) == 0){
             usernamelength = strlen(usernamestring);
+
             handleLoginRequest(usernamestring,usernamelength);
+
         }else {
-
             throw404();
-
         }
     }
 
@@ -344,7 +412,7 @@ void parseRedirect(char* buffer, int startofcommand,int buffersize){
     if(strstr(buffer,"?redirect=") != NULL || strstr(buffer,"&redirect=") != NULL){
         querystring = strstr(buffer,"redirect=");
 
-        for(i = 9; i <99; i ++){
+        for(i = 10; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
@@ -393,7 +461,7 @@ void parseGetFile(char* buffer, int startofcommand,int buffersize){
     if(strstr(buffer,"?filename=") != NULL || strstr(buffer,"&filename=") != NULL){
         querystring = strstr(buffer,"filename=");
 
-        for(i = 9; i <99; i ++){
+        for(i = 10; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
@@ -442,7 +510,7 @@ void parseAddCart(char* buffer, int startofcommand,int buffersize){
     if(strstr(buffer,"?item=") != NULL || strstr(buffer,"&item=") != NULL){
         querystring = strstr(buffer,"item=");
 
-        for(i = 9; i <99; i ++){
+        for(i = 6; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
@@ -492,7 +560,7 @@ void parseDelCart(char* buffer, int startofcommand,int buffersize){
     if(strstr(buffer,"?itemnr=") != NULL || strstr(buffer,"&itemnr=") != NULL){
         querystring = strstr(buffer,"itemnr=");
 
-        for(i = 9; i <99; i ++){
+        for(i = 8; i <99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
@@ -555,7 +623,6 @@ void parseClose(char* buffer, int startofcommand,int buffersize) {
 
 }
 
-
 /*
  * Print buffer helper function
  */
@@ -572,14 +639,14 @@ void printBuffer(char *buffer, int buffersize){
  */
 void handleLoginRequest(char* querystring, int querystringsize){
     // First do some cleanup. This is a bug, fix it later if there is time
-    char *username = malloc(querystringsize+1);
+    char *username = malloc(querystringsize);
     strncpy(username,querystring,querystringsize);
     username[querystringsize] = '\0';
 
     // Set the local user to logged in
     loggedInUserName = username;
     isLoggedIn = 1;
-
+    printf("Logging in %s\n",querystring);
     // Get the various header messages
 
     //    // The delivery code message
@@ -784,7 +851,8 @@ void throw404(){
     strcat(finalString, cacheMessage);
     strcat(finalString, contentMessage);
 
-    sendToClient(finalString,strlen(finalString));
+    printf("%s",finalString);
+    //sendToClient(finalString,strlen(finalString));
 
     // Free memory
     free(finalString);
@@ -809,6 +877,10 @@ void handleCheckoutRequest(){
 void handleGetFileRequest(char* querystring, int querystringlength){
     printf("getfile");
 }
+void handlePutFileRequest(char* putfilestring,char* contentstring,int putfilelength,int contentstringlength){
+
+}
+
 void handleRedirectRequest(char* querystring, int querystringlength){
     printf("redirect");
 }

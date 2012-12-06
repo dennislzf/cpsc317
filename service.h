@@ -28,6 +28,7 @@ void handleAddCartRequest(char* querystring, int querystringsize);
 void handleDelCartRequest(char* querystring);
 void handleRedirectRequest(char* querystring, int querystringsize);
 void handleGetFileRequest(char* querystring, int querystringsize);
+void handlePutFileRequest(char* putfilestring,char* contentstring,int putfilelength,int contentstringlength);
 void throw404();
 void parseLogout(char* buffer, int buffersize, int startofcommand);
 void parseLogin(char* buffer, int buffersize, int startofcommand);
@@ -35,8 +36,10 @@ void parseCheckout(char* buffer, int buffersize, int startofcommand);
 void parseBrowser(char* buffer, int buffersize, int startofcommand);
 void parseRedirect(char* buffer, int buffersize, int startofcommand);
 void parseGetFile(char* buffer, int buffersize, int startofcommand);
+void parsePutFile(char* buffer,int startofcommand,int buffersize);
 void parseAddCart(char* buffer, int buffersize, int startofcommand);
 void parseDelCart(char* buffer, int buffersize, int startofcommand);
 void parseCheckout(char* buffer, int buffersize, int startofcommand);
 void parseClose(char* buffer, int buffersize, int startofcommand);
+
 #endif
