@@ -116,16 +116,13 @@ void flushCommandBuffer(char* commandBuffer){
     commandBufferContent = 0;
 }
 
-char* parseCommand(char* buffer, int buffersize){
-    char*  querystring[4];
-    querystring[1] =malloc(99);
-    querystring[2] =malloc(99);
-    querystring[3] =malloc(99);
+void parseCommand(char* buffer, int buffersize){
+ 
     char* requesttype;
-    char* commandtype;
-    int querystringval = 0;
+
+   
     int startofcommand;
-    int parameter = 0;
+    
     //if request type is GET;
     if(buffer[0] == 'G'){
         requesttype = "GET";
@@ -162,41 +159,11 @@ char* parseCommand(char* buffer, int buffersize){
 
     case('l'):
         if (buffer[startofcommand + 4] == 'i'){
-            commandtype = "login";
-            if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
-                throw404();
-            }else{
-                for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                    strservertime[ii] = tolower(buffer[i]);
-                    ii++;
-                }
-
-                if(strncmp(strservertime,"login",5) == 0){
-                    handleLoginRequest();
-                }else {
-
-                    throw404();}
-
-            }
+            parseLogin(buffer,startofcommand,buffersize);
         }
-        else{
-            if(buffer[startofcommand + 7] != ' ' && buffer[startofcommand + 7] != '?'){
-                throw404();
-            }else{
-                for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                    strservertime[ii] = tolower(buffer[i]);
-                    ii++;
-                }
-
-                if(strncmp(strservertime,"logout",6) == 0){
-                    handleLogoutRequest();
-                }else {
-
-                    throw404();}
-
-            }
-        }
-        commandtype = "logout";
+      
+            
+        parseLogout(buffer,startofcommand,buffersize);
 
         break;
 
@@ -219,213 +186,110 @@ char* parseCommand(char* buffer, int buffersize){
             }
         }
 
-        commandtype = "servertime";
         break;
     case('b'):
-        if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
-
-            throw404();
-        }
-        else{
-            for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                strservertime[ii] = tolower(buffer[i]);
-                ii++;
-            }
-
-            if(strncmp(strservertime,"browser",7) == 0){
-                handleBrowserRequest();
-            }else {
-
-                throw404();
-            }
-        }
-        commandtype = "browser";
+    parseBrowser(buffer,startofcommand,buffersize);
         break;
     case('r'):
-        if(buffer[startofcommand + 9] != ' ' && buffer[startofcommand + 9] != '?'){
-
-            throw404();
-        }
-        else{
-            for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                strservertime[ii] = tolower(buffer[i]);
-                ii++;
-            }
-
-            if(strncmp(strservertime,"redirect",8) == 0){
-                handleRedirectRequest();
-            }else {
-
-                throw404();
-            }
-        }
-        commandtype = "redirect";
+        parseRedirect(buffer,startofcommand,buffersize);
         break;
     case('g'):
-        if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
-
-            throw404();
-        }
-        else{
-            for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                strservertime[ii] = tolower(buffer[i]);
-                ii++;
-            }
-
-            if(strncmp(strservertime,"getfile",7) == 0){
-                handleGetFileRequest();
-            }else {
-
-                throw404();
-            }
-        }
-        commandtype = "getfile";
+        parseGetFile(buffer,startofcommand,buffersize);
         break;
     case('a'):
-        if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
-
-            throw404();
-        }
-        else{
-            for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                strservertime[ii] = tolower(buffer[i]);
-                ii++;
-            }
-
-            if(strncmp(strservertime,"addcart",7) == 0){
-                handleAddCartRequest();
-            }else {
-
-                throw404();
-            }
-        }
-
-        commandtype = "addcart";
+       parseAddCart(buffer,startofcommand,buffersize);
         break;
     case('d'):
-        if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
-
-            throw404();
-        }
-        else{
-            for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                strservertime[ii] = tolower(buffer[i]);
-                ii++;
-            }
-
-            if(strncmp(strservertime,"delcart",7) == 0){
-                handleDelCartRequest();
-            }else {
-
-                throw404();
-            }
-        }
-        commandtype = "delcart";
+       parseDelCart(buffer,startofcommand,buffersize);
         break;
     case('c'):
         if(buffer[startofcommand + 2] == 'h'){
-            if(buffer[startofcommand + 9] != ' ' && buffer[startofcommand + 9] != '?'){
-
-                throw404();
-            }
-            else{
-                for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                    strservertime[ii] = tolower(buffer[i]);
-                    ii++;
-                }
-
-                if(strncmp(strservertime,"checkout",8) == 0){
-                    handleCheckoutRequest();
-                }else {
-
-                    throw404();
-                }
-            }
-            commandtype = "checkout";
+           parseCheckout(buffer,startofcommand,buffersize);
         }
         else{
-            if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
-
-                throw404();
-            }
-            else{
-                for (i = startofcommand + 1; i <startofcommand + 11;i++){
-                    strservertime[ii] = tolower(buffer[i]);
-                    ii++;
-                }
-
-                if(strncmp(strservertime,"close",5) == 0){
-                    handleCloseRequest();
-                }else {
-
-                    throw404();
-                }
-            }
-            commandtype = "close";
+           parseClose(buffer,startofcommand,buffersize);
         }
         break;
     default:
-        commandtype = "Command not found.";
+        throw404();
         break;
     }
-    // check if there is a query string.
-    int o;
-    for( o = 0; o < buffersize; o++)
-    {
-        if(buffer[o] == '?'){
-            querystringval = o;
-            break;
+}
+void parseLogout(char* buffer, int startofcommand,int buffersize){
+    
+}
+void parseLogin(char* buffer, int startofcommand,int buffersize){
+    char* querystring = malloc(99);
+    char* usernamestring = malloc(99);
+    char* strcheck = malloc(99);
+    int i = 0;
+    int ii = 0;
+    int k = 0;
+    int usernamelength = 0;
+printf("it's here: %s",strstr(buffer,"?username="));
+    if(strstr(buffer,"?username=") != NULL || strstr(buffer,"&username=") != NULL){
+        querystring = strstr(buffer,"username=");
+       
+        for(i = 9; i <99; i ++){
+            if(querystring[i] == ' ' || querystring[i] == '&'){
+                break;
+            }
+       
+            usernamestring[k] = querystring[i];
+            k++;
         }
+        
+    }else{
+ 
+        throw404();
+        return;
     }
-    // if there are parameters in the query string, parse it and place into bucket.
-    if(querystringval != 0){
-        int startofstring = querystringval +1;
-        //number of parameters
+  
+  
 
-        //start of parameter char array
-        int parameterstring = 0 ;
-        // if there are more parameters, value to 1;
-        int moreparameter = 1;
-        int p;
-
-        while(moreparameter == 1){
-            parameterstring= 0;
-
-            for( p = startofstring; p < buffersize ; p++){
-                if(buffer[p] == '&'){
-                    startofstring = p+1;
-                    moreparameter = 1;
-                    break;
-                }
-                if(buffer[p] == ' '){
-                    moreparameter = 0;
-                    break;
+    //check if client types login
+       if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
+                throw404();
+            }else{
+                for (i = startofcommand + 1; i <startofcommand + 11;i++){
+                    strcheck[ii] = tolower(buffer[i]);
+                    ii++;
                 }
 
-                querystring[parameter][parameterstring] = buffer[p];
-                parameterstring++;
+                if(strncmp(strcheck,"login",5) == 0){
+		    usernamelength = strlen(usernamestring);
+                    handleLoginRequest(usernamestring,usernamelength);
+                }else {
+
+                    throw404();
 
             }
-
-            parameter++;
-
         }
-    }
-
-    //return the string array containing all the values;
-    requestparse[0] = requesttype;
-    requestparse[1] = commandtype;
-    int numparameter = 0;
-    int q;
-    for(q  = 2; q < 2 + parameter; q++){
-        requestparse[q] = querystring[numparameter];
-        numparameter++;
-    }
-
-
-
-    return *requestparse;
+     
+ }
+ void parseCheckout(char* buffer, int startofcommand,int buffersize ) {
+     
+ }
+  void parseBrowser(char* buffer, int startofcommand,int buffersize){
+      
 }
+ void parseRedirect(char* buffer, int startofcommand,int buffersize){
+     
+ }
+ void parseGetFile(char* buffer, int startofcommand,int buffersize){
+     
+ }
+void parseAddCart(char* buffer, int startofcommand,int buffersize){
+    
+}
+void parseDelCart(char* buffer, int startofcommand,int buffersize){
+    
+}
+
+ void parseClose(char* buffer, int startofcommand,int buffersize) {
+     
+ }
+
 
 /*
  * Print buffer helper function
@@ -439,7 +303,7 @@ void printBuffer(char *buffer, int buffersize){
     printf("\n");
 }
 
-void handleLoginRequest(){
+void handleLoginRequest(char* querystring, int querystringsize){
 }
 /*
  * Handles a servertime request from the client
