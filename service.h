@@ -19,6 +19,7 @@ char* getGMTDateMessage();
 char* getLocalDateMessage();
 void extractUserAgent(char * buffer);
 char* getUserAgent();
+char* setCookie(char *msg);
 void handleServerTimeRequest();
 void sendToClient(char* content, int contentLength);
 void handleLoginRequest(char* querystring, int querystringsize);

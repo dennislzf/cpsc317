@@ -319,15 +319,12 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
     int usernamelength = 0;
     if(strstr(buffer,"?username=") != NULL || strstr(buffer,"&username=") != NULL){
         querystring = strstr(buffer,"username=");
-
         for(i = 9; i < 99; i ++){
             if(querystring[i] == ' ' || querystring[i] == '&' || querystring[i] == 0){
                 break;
             }
-            printf("adding %c\n", querystring[i]);
             usernamestring[k] = querystring[i];
             usernamestring[++k] = '\0';
-            printf("new string %s\n", usernamestring);
 
         }
 
@@ -335,8 +332,6 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
         throw404();
         return;
     }
-    printf("%s \n\n",usernamestring);
-
 
     //check if client types login
     if(buffer[startofcommand + 6] != ' ' && buffer[startofcommand + 6] != '?'){
@@ -347,14 +342,12 @@ void parseLogin(char* buffer, int startofcommand,int buffersize){
             ii++;
         }
 
+        // Actually login
         if(strncmp(strcheck,"login",5) == 0){
-            printf("Hello there %s %d",usernamestring,k);
             usernamelength = strlen(usernamestring);
             handleLoginRequest(usernamestring,usernamelength);
         }else {
-
             throw404();
-
         }
     }
 
@@ -656,23 +649,36 @@ void handleLoginRequest(char* querystring, int querystringsize){
     printf("Logging in %s \n",querystring);
     // Get the various header messages
 
-    //    // The delivery code message
-    //    char* deliveryCodeMessage = getDeliveryCode(200);
-    //    int deliveryLength = strlen(deliveryCodeMessage);
+    // The delivery code message
+    char* deliveryCodeMessage = getDeliveryCode(200);
+    int deliveryLength = strlen(deliveryCodeMessage);
 
-    //    // The connection message
-    //    char* connectionMessage = getConnectionMessage(0); // close the connection
-    //    int connectionLength = strlen(connectionMessage);
+    // The connection message
+    char* connectionMessage = getConnectionMessage(1); // close the connection
+    int connectionLength = strlen(connectionMessage);
 
-    //    // The date message
-    //    char* dateMessage = getDateMessage();
-    //    int dateLength = strlen(dateMessage);
+    // The date message
+    char* dateMessage = getGMTDateMessage();
+    int dateLength = strlen(dateMessage);
 
-    //    // Content message
-    //    char * contentMessage = "\nCommand not found\n";
-    //    int contentLength = strlen(contentMessage);
+    // Set the cookie
+    char* cookieMessage = setCookie("");
+    int cookieLength = strlen(cookieMessage);
 
+    // Content message
+    char * contentMessage = querystring;
+    int contentLength = strlen(contentMessage);
 
+    // Copy together all the strings
+    char* finalString;
+    finalString = malloc(deliveryLength + connectionLength + dateLength  + contentLength + cookieLength);
+    strcpy(finalString, deliveryCodeMessage);
+    strcat(finalString, connectionMessage);
+    strcat(finalString, dateMessage);
+    strcat(finalString, cookieMessage);
+    strcat(finalString, contentMessage);
+
+    sendToClient(finalString,strlen(finalString));
 }
 /*
  * Handles a servertime request from the client
@@ -883,7 +889,25 @@ void extractUserAgent(char *buffer){
     memmove(userAgent,userAgent + 12,strlen(userAgent)); // remove the first 12 characters from the string
 
 }
+/**
+ * Returns a string with the Set Cookie directive
+ */
+char* setCookie(char *msg){
+    char *partOne = "Set-Cookie: ";
+    char *partTwo = "; Max-Age=86400; Version=1";
+    char* finalString;
+    finalString = malloc(strlen(msg) + strlen(partOne)+ strlen(partTwo));
+    strcpy(finalString, partOne);
+    strcat(finalString, msg);
+    strcat(finalString, partTwo);
 
+    return finalString;
+
+}
+
+/**
+ * Displays the user agent to the user
+ */
 void handleBrowserRequest(){
     printf("Handling Browser\n");
     char* deliveryCodeMessage = getDeliveryCode(200);
