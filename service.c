@@ -641,7 +641,7 @@ void handleLoginRequest(char* querystring, int querystringsize){
     // First do some cleanup. This is a bug, fix it later if there is time
     char *username = malloc(querystringsize);
     strncpy(username,querystring,querystringsize);
-    //    username[querystringsize] = '\0';
+    username[querystringsize] = '\0';
 
     // Set the local user to logged in
     loggedInUserName = username;
@@ -654,17 +654,25 @@ void handleLoginRequest(char* querystring, int querystringsize){
     int deliveryLength = strlen(deliveryCodeMessage);
 
     // The connection message
-    char* connectionMessage = getConnectionMessage(1); // close the connection
+    char* connectionMessage = getConnectionMessage(1); // keep the connection open
     int connectionLength = strlen(connectionMessage);
 
     // The date message
     char* dateMessage = getGMTDateMessage();
     int dateLength = strlen(dateMessage);
 
-    // Set the cookie
-    char* cookieMessage = setCookie("");
-    int cookieLength = strlen(cookieMessage);
+    // Create cookie content
+    char * directive = "username=";
+    char *cookieContent = malloc(strlen(username) + strlen(directive));
+    strcpy(cookieContent,directive);
+    strcat(cookieContent,username);
+    printf("The cookie username is %s\n",username);
+    printf("The cookie directive is %s\n",directive);
+    printf("The cookie content is %s\n",cookieContent);
 
+    // Set the cookie
+    char* cookieMessage = setCookie(cookieContent);
+    int cookieLength = strlen(cookieMessage);
     // Content message
     char * contentMessage = querystring;
     int contentLength = strlen(contentMessage);
@@ -679,6 +687,10 @@ void handleLoginRequest(char* querystring, int querystringsize){
     strcat(finalString, contentMessage);
 
     sendToClient(finalString,strlen(finalString));
+
+    //free memory
+    free(finalString);
+    free(cookieContent);
 }
 /*
  * Handles a servertime request from the client
