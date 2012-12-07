@@ -646,7 +646,6 @@ void handleLoginRequest(char* querystring, int querystringsize){
     // Set the local user to logged in
     loggedInUserName = username;
     isLoggedIn = 1;
-    printf("Logging in %s \n",querystring);
     // Get the various header messages
 
     // The delivery code message
@@ -666,13 +665,11 @@ void handleLoginRequest(char* querystring, int querystringsize){
     char *cookieContent = malloc(strlen(username) + strlen(directive));
     strcpy(cookieContent,directive);
     strcat(cookieContent,username);
-    printf("The cookie username is %s\n",username);
-    printf("The cookie directive is %s\n",directive);
-    printf("The cookie content is %s\n",cookieContent);
 
     // Set the cookie
     char* cookieMessage = setCookie(cookieContent);
     int cookieLength = strlen(cookieMessage);
+
     // Content message
     char * contentMessage = querystring;
     int contentLength = strlen(contentMessage);
