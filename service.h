@@ -44,5 +44,6 @@ void parseAddCart(char* buffer, int buffersize, int startofcommand);
 void parseDelCart(char* buffer, int buffersize, int startofcommand);
 void parseCheckout(char* buffer, int buffersize, int startofcommand);
 void parseClose(char* buffer, int buffersize, int startofcommand);
+void checkNumItems(char* commandBuffer);
 
 #endif
