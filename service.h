@@ -17,6 +17,8 @@ char* getConnectionMessage(int command);
 char* getCacheMessage(int command);
 char* getGMTDateMessage();
 char* getLocalDateMessage();
+void extractUserAgent(char * buffer);
+char* getUserAgent();
 void handleServerTimeRequest();
 void sendToClient(char* content, int contentLength);
 void handleLoginRequest(char* querystring, int querystringsize);

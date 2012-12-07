@@ -25,6 +25,7 @@ int commandBufferContent = 0;
 int isSocketClosed = 0;
 int clientSocket =-1;
 int isLoggedIn = 0;
+char *userAgent;
 char *loggedInUserName;
 char* requestparse[7];
 
@@ -39,6 +40,7 @@ void handle_client(int socket) {
 
         receive(socket,commandBuffer);
         if(requestIsValid(commandBuffer,commandBufferContent)){
+            extractUserAgent(commandBuffer);
             parseCommand(commandBuffer, commandBufferContent);
         }
         flushCommandBuffer(commandBuffer);
@@ -822,6 +824,10 @@ char* getLocalDateMessage(){
 void handleLogoutRequest(){
     printf("logout");
 }
+char* getUserAgent(){
+    return userAgent;
+}
+
 /*
  * Sends a 404 back to the client
  */
@@ -856,16 +862,64 @@ void throw404(){
     strcat(finalString, cacheMessage);
     strcat(finalString, contentMessage);
 
-    printf("%s",finalString);
-    //sendToClient(finalString,strlen(finalString));
+    sendToClient(finalString,strlen(finalString));
 
     // Free memory
     free(finalString);
 
 
 }
+/**
+ * Extracts the userAgent from the header
+ */
+void extractUserAgent(char *buffer){
+    char *substring = strstr(buffer,"User-Agent:");
+
+    // No User Agent provided
+    if(substring == NULL){
+        return;
+    }
+    userAgent = strtok(substring,"\n");
+    memmove(userAgent,userAgent + 12,strlen(userAgent)); // remove the first 12 characters from the string
+
+}
+
 void handleBrowserRequest(){
-    printf("browser");
+    printf("Handling Browser\n");
+    char* deliveryCodeMessage = getDeliveryCode(200);
+    int deliveryLength = strlen(deliveryCodeMessage);
+
+    // The connection message
+    char* connectionMessage = getConnectionMessage(1); // keep alive
+    int connectionLength = strlen(connectionMessage);
+
+    // The date message
+    char* dateMessage = getGMTDateMessage();
+    int dateLength = strlen(dateMessage);
+
+    // Content message
+    char * contentMessage = getUserAgent();
+    int contentLength = strlen(contentMessage);
+
+    // The cache message
+    char* cacheMessage = getCacheMessage(0);
+    int cacheLength = strlen(cacheMessage);
+
+    // Copy together all the strings
+    char* finalString;
+    finalString = malloc(deliveryLength + connectionLength + dateLength + cacheLength  + contentLength + 1);
+    strcpy(finalString, deliveryCodeMessage);
+    strcat(finalString, connectionMessage);
+    strcat(finalString, dateMessage);
+    strcat(finalString, cacheMessage);
+    strcat(finalString, "\n");
+    strcat(finalString, contentMessage);
+
+    sendToClient(finalString,strlen(finalString));
+
+    // Free memory
+    free(finalString);
+
 }
 void handleCloseRequest(){
     printf("close");
