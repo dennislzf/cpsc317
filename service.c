@@ -28,6 +28,8 @@ int isLoggedIn = 0;
 char *userAgent;
 char *loggedInUserName;
 char* requestparse[7];
+int numitems= 1;
+
 
 void handle_client(int socket) {
     char *commandBuffer = malloc(sizeof(char) * commandBufferCapcity);
@@ -39,9 +41,11 @@ void handle_client(int socket) {
         }
 
         receive(socket,commandBuffer);
+
         if(requestIsValid(commandBuffer,commandBufferContent)){
-            extractUserAgent(commandBuffer);
-            parseCommand(commandBuffer, commandBufferContent);
+    checkNumItems(commandBuffer);
+        extractUserAgent(commandBuffer);
+        parseCommand(commandBuffer, commandBufferContent);
         }
         flushCommandBuffer(commandBuffer);
         isSocketClosed = 1;
@@ -51,6 +55,8 @@ void handle_client(int socket) {
     return;
 
 }
+
+
 /*
  * Receives a command from a socket
  * and writes it into the commandBuffer
@@ -507,6 +513,7 @@ void parseAddCart(char* buffer, int startofcommand,int buffersize){
     int i = 0;
     int ii = 0;
     int k = 0;
+
     int addcartlength = 0;
     if(strstr(buffer,"?item=") != NULL || strstr(buffer,"&item=") != NULL){
         querystring = strstr(buffer,"item=");
@@ -515,9 +522,11 @@ void parseAddCart(char* buffer, int startofcommand,int buffersize){
             if(querystring[i] == ' ' || querystring[i] == '&' ){
                 break;
             }
-
+		
             addcartstring[k] = querystring[i];
+
             k++;
+
         }
 
     }else{
@@ -528,7 +537,7 @@ void parseAddCart(char* buffer, int startofcommand,int buffersize){
 
 
 
-    //check if client types login
+    //check if client types addcart
     if(buffer[startofcommand + 8] != ' ' && buffer[startofcommand + 8] != '?'){
         throw404();
     }else{
@@ -537,7 +546,7 @@ void parseAddCart(char* buffer, int startofcommand,int buffersize){
             ii++;
         }
 
-        if(strncmp(strcheck,"addcart",8) == 0){
+        if(strncmp(strcheck,"addcart",7) == 0){
 
             addcartstring[k] = '\0';
             addcartlength = k;
@@ -669,6 +678,7 @@ void handleLoginRequest(char* querystring, int querystringsize){
     // Set the cookie
     char* cookieMessage = setCookie(cookieContent);
     int cookieLength = strlen(cookieMessage);
+
 
     // Content message
     char * contentMessage = querystring;
@@ -958,7 +968,65 @@ void handleCloseRequest(){
     printf("close");
 }
 void handleAddCartRequest(char* querystring, int querystringlength){
-    printf("addcart");
+ 
+    printf("Adding %s to cart", querystring);
+    // The delivery code message
+    char* deliveryCodeMessage = getDeliveryCode(200);
+    int deliveryLength = strlen(deliveryCodeMessage);
+
+    // The connection message
+    char* connectionMessage = getConnectionMessage(1); // keep the connection open
+    int connectionLength = strlen(connectionMessage);
+
+    // The date message
+    char* dateMessage = getGMTDateMessage();
+    int dateLength = strlen(dateMessage);
+
+    // Create cookie content
+	char itemno[3];
+	char str[8] = "item";
+	sprintf(itemno,"%d",numitems);
+	if(numitems>9){
+	str[4]= itemno[0];
+	str[5]= itemno[1];
+	str[6]= '=';
+	}
+	else{
+	str[4]= itemno[0];
+	str[5]= '=';
+	}
+	char * directive = malloc(10);
+	directive = str;
+
+    numitems++;
+    char *cookieContent = malloc(strlen(querystring) + strlen(directive));
+    strcpy(cookieContent,directive);
+    strcat(cookieContent,querystring);
+
+
+
+    // Set the cookie
+    char* cookieMessage = setCookie(cookieContent);
+    int cookieLength = strlen(cookieMessage);
+
+    // Content message
+    char * contentMessage = querystring;
+    int contentLength = strlen(contentMessage);
+
+    // Copy together all the strings
+    char* finalString;
+    finalString = malloc(deliveryLength + connectionLength + dateLength  + contentLength + cookieLength);
+    strcpy(finalString, deliveryCodeMessage);
+    strcat(finalString, connectionMessage);
+    strcat(finalString, dateMessage);
+    strcat(finalString, cookieMessage);
+    strcat(finalString, contentMessage);
+
+    sendToClient(finalString,strlen(finalString));
+
+    //free memory
+    free(finalString);
+    free(cookieContent);
 }
 void handleDelCartRequest(char* querystring){
     printf("delcart");
@@ -975,4 +1043,33 @@ void handlePutFileRequest(char* putfilestring,char* contentstring,int putfilelen
 
 void handleRedirectRequest(char* querystring, int querystringlength){
     printf("redirect");
+}
+
+/*Check the Number of item cookies there are
+*/
+void checkNumItems(char* commandBuffer){
+
+int i = 1;
+char strcmp[7] = "item";
+
+
+for(i = 1; i <13; i++){
+char str[3];
+sprintf(str,"%d",i);
+strcmp[4] = str[0];
+if(i <10){
+strcmp[5]=str[1];
+strcmp[6]='=';
+}else {
+strcmp[5]=str[1];
+strcmp[6]=str[2];
+strcmp[7]= '=';
+}
+
+if(strstr(commandBuffer,strcmp) == NULL){
+break;
+}else numitems++;
+
+}
+
 }
